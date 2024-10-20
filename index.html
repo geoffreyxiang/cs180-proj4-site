@@ -1,0 +1,371 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CS 180 Project 4A</title>
+</head>
+<body style="font-family: Verdana;">
+    <center><h1>CS 180 Project 4A - Geoffrey Xiang</h1></center>
+    <h2>Shoot the Pictures</h2>
+    <p>
+	Here are some of the images I took for image rectification:
+    </p>
+    <div class="container">
+	<figure>
+	    <img src="assets/cards.jpeg">
+	    <figcaption>Playing Cards</figcaption>
+	</figure>
+	<figure>
+	    <img src="assets/cards_angled.jpeg"/>
+	    <figcaption>Playing Cards Angled</figcaption>
+	</figure>
+	<figure>
+	    <img src="assets/chicken_tendies.jpeg"/>
+	    <figcaption>Chicken Tenders</figcaption>
+	</figure>
+    </div>
+    <p>
+	Here are some of the images I took for mosaic building:
+    </p>
+    <div class="container">
+	<figure>
+	    <img src="assets/1.jpeg">
+	    <figcaption>Kitchen (Left)</figcaption>
+	</figure>
+	<figure>
+	    <img src="assets/2.jpeg"/>
+	    <figcaption>Kitchen (Right)</figcaption>
+	</figure>
+    </div>
+    <div class="container">
+	<figure>
+	    <img src="assets/room_left.jpeg">
+	    <figcaption>Desk (Left)</figcaption>
+	</figure>
+	<figure>
+	    <img src="assets/room_right.jpeg"/>
+	    <figcaption>Desk (Right)</figcaption>
+	</figure>
+    </div>
+    <div class="container">
+	<figure>
+	    <img src="assets/stuffs_top.jpeg">
+	    <figcaption>Room (Top)</figcaption>
+	</figure>
+	<figure>
+	    <img src="assets/stuffs_bottom.jpeg"/>
+	    <figcaption>Room (Bottom)</figcaption>
+	</figure>
+    </div>
+    <h2>Recover Homographies</h2>
+    <p>
+	We first need to label some correspondence points on our images. Then, we can find a projective transformation between the correspondence points of one image and the correspondence points of another image. This transformation is our homography H, and we can use H to then warp an entire image to the viewpoint of another image or object. 
+    </p>
+    <div class="container">
+	<figure>
+	    <img src="assets/special/labeled_1.jpeg">
+	    <figcaption>Kitchen (Left) Correspondence Points</figcaption>
+	</figure>
+	<figure>
+	    <img src="assets/special/labeled_2.jpeg"/>
+	    <figcaption>Kitchen (Right) Corrspondence Points</figcaption>
+	</figure>
+    </div>
+    <p>
+	To actually solve for the homography matrix, we use each of the correpondencies to set up several equations (one equation per correspondence) in the form Hp = p', where H is our homography matrix, p is one of the points with the form [x, y, 1].T and p' is the corresponding point on the other image with the form [wx', wy', w].T, where w is the scaling factor. Expanding each equation out, we can convert them each to the following form:
+    </p>
+	<math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+	  <mtable displaystyle="true" columnalign="right left" columnspacing="0em" rowspacing="3pt">
+	    <mtr>
+	      <mtd>
+		<mrow data-mjx-texclass="INNER">
+		  <mo data-mjx-texclass="OPEN">[</mo>
+		  <mtable columnalign="center" columnspacing="1em" rowspacing="4pt">
+		    <mtr>
+		      <mtd>
+			<mi>x</mi>
+		      </mtd>
+		      <mtd>
+			<mi>y</mi>
+		      </mtd>
+		      <mtd>
+			<mn>1</mn>
+		      </mtd>
+		      <mtd>
+			<mn>0</mn>
+		      </mtd>
+		      <mtd>
+			<mn>0</mn>
+		      </mtd>
+		      <mtd>
+			<mn>0</mn>
+		      </mtd>
+		      <mtd>
+			<mo>&#x2212;</mo>
+			<mi>x</mi>
+			<msup>
+			  <mi>x</mi>
+			  <mo data-mjx-alternate="1">&#x2032;</mo>
+			</msup>
+		      </mtd>
+		      <mtd>
+			<mo>&#x2212;</mo>
+			<mi>y</mi>
+			<msup>
+			  <mi>x</mi>
+			  <mo data-mjx-alternate="1">&#x2032;</mo>
+			</msup>
+		      </mtd>
+		    </mtr>
+		    <mtr>
+		      <mtd>
+			<mn>0</mn>
+		      </mtd>
+		      <mtd>
+			<mn>0</mn>
+		      </mtd>
+		      <mtd>
+			<mn>0</mn>
+		      </mtd>
+		      <mtd>
+			<mi>x</mi>
+		      </mtd>
+		      <mtd>
+			<mi>y</mi>
+		      </mtd>
+		      <mtd>
+			<mn>1</mn>
+		      </mtd>
+		      <mtd>
+			<mo>&#x2212;</mo>
+			<mi>x</mi>
+			<msup>
+			  <mi>y</mi>
+			  <mo data-mjx-alternate="1">&#x2032;</mo>
+			</msup>
+		      </mtd>
+		      <mtd>
+			<mo>&#x2212;</mo>
+			<mi>y</mi>
+			<msup>
+			  <mi>y</mi>
+			  <mo data-mjx-alternate="1">&#x2032;</mo>
+			</msup>
+		      </mtd>
+		    </mtr>
+		  </mtable>
+		  <mo data-mjx-texclass="CLOSE">]</mo>
+		</mrow>
+		<mrow data-mjx-texclass="INNER">
+		  <mo data-mjx-texclass="OPEN">[</mo>
+		  <mtable columnalign="center" columnspacing="1em" rowspacing="4pt">
+		    <mtr>
+		      <mtd>
+			<mi>a</mi>
+		      </mtd>
+		    </mtr>
+		    <mtr>
+		      <mtd>
+			<mi>b</mi>
+		      </mtd>
+		    </mtr>
+		    <mtr>
+		      <mtd>
+			<mi>c</mi>
+		      </mtd>
+		    </mtr>
+		    <mtr>
+		      <mtd>
+			<mi>d</mi>
+		      </mtd>
+		    </mtr>
+		    <mtr>
+		      <mtd>
+			<mi>e</mi>
+		      </mtd>
+		    </mtr>
+		    <mtr>
+		      <mtd>
+			<mi>f</mi>
+		      </mtd>
+		    </mtr>
+		    <mtr>
+		      <mtd>
+			<mi>g</mi>
+		      </mtd>
+		    </mtr>
+		    <mtr>
+		      <mtd>
+			<mi>h</mi>
+		      </mtd>
+		    </mtr>
+		  </mtable>
+		  <mo data-mjx-texclass="CLOSE">]</mo>
+		</mrow>
+		<mo>=</mo>
+		<mrow data-mjx-texclass="INNER">
+		  <mo data-mjx-texclass="OPEN">[</mo>
+		  <mtable columnalign="center" columnspacing="1em" rowspacing="4pt">
+		    <mtr>
+		      <mtd>
+			<msup>
+			  <mi>x</mi>
+			  <mo data-mjx-alternate="1">&#x2032;</mo>
+			</msup>
+		      </mtd>
+		    </mtr>
+		    <mtr>
+		      <mtd>
+			<msup>
+			  <mi>y</mi>
+			  <mo data-mjx-alternate="1">&#x2032;</mo>
+			</msup>
+		      </mtd>
+		    </mtr>
+		  </mtable>
+		  <mo data-mjx-texclass="CLOSE">]</mo>
+		</mrow>
+	      </mtd>
+	    </mtr>
+	  </mtable>
+	</math>
+    <p>
+	Stacking each of these equations, we can solve for a, b, ..., h using least squares, and then construct H. 
+    </p>
+    <h2>Warp the Images/Image Rectification</h2>
+    <p>
+	Using the homographies computed, we can now start warping our images. In the images I took, I know that at least one of the objects is rectangular. It doesn't completely look rectangular if you measure it in the image due to how the viewing angle distorts the image, but with this knowledge, we can make it look rectangular. Taking the corners of the object as correspondencies, we can warp the object into the desired rectangle, giving us the viewpoint of looking at the object straight on. For the warping process, I used inverse warping and interpolation. 
+    </p>
+    <div class="container">
+	<figure>
+	    <img src="assets/cards.jpeg">
+	    <figcaption>Cards</figcaption>
+	</figure>
+	<figure>
+	    <img src="assets/warped_cards.jpeg"/>
+	    <figcaption>Rectified Cards</figcaption>
+	</figure>
+    </div>
+    <div class="container">
+	<figure>
+	    <img src="assets/cards_angled.jpeg">
+	    <figcaption>Cards with More Angle</figcaption>
+	</figure>
+	<figure>
+	    <img src="assets/warped_cards_angled.jpeg"/>
+	    <figcaption>Rectified Cards</figcaption>
+	</figure>
+    </div>
+    <div class="container">
+	<figure>
+	    <img src="assets/chicken_tendies.jpeg">
+	    <figcaption>Chicken Tenders</figcaption>
+	</figure>
+	<figure>
+	    <img src="assets/warped_chicken_tendies.jpeg"/>
+	    <figcaption>Rectified Chicken Tendies</figcaption>
+	</figure>
+    </div>
+    <h2>Blend the Images into a Mosaic</h2>
+    <p>
+	We can now start to create mosaics from images. The image warping process is the same as in the previous step. Instead of rectangular homographies, I manually selected key features (mostly corners) within each image to help with the warping. After aligning the images, I used the bwdist distance transform metric to create a mask for each image. From here, I used a 2-band Laplacian Stack blending approach to blend the overlapping regions smoothly. The low frequencies were blended using a linear combination weighted by the distance transform metric, and the high frequencies were taken from the larger corresponding distance tranform. 
+    </p>
+    <p>
+	For example, from these two images (after being warped to each other), here is the distance transform for each image: 
+    </p>
+    <div class="container">
+	<figure>
+	    <img src="assets/special/warped_final_1.jpeg">
+	    <figcaption>Kitchen (Left Warped onto Right)</figcaption>
+	</figure>
+	<figure>
+	    <img src="assets/special/warped_final_2.jpeg"/>
+	    <figcaption>Kitchen (Right)</figcaption>
+	</figure>
+    </div>
+    <div class="container">
+	<figure>
+	    <img src="assets/special/distance_1.jpeg">
+	    <figcaption>Distance Transform (Left)</figcaption>
+	</figure>
+	<figure>
+	    <img src="assets/special/distance_2.jpeg"/>
+	    <figcaption>Distance Transform (Right)</figcaption>
+	</figure>
+    </div>
+    <p>
+	Using the process described earlier with the distance transform and 2-band Laplacian Stacks, we can finish making these mosaics! Here are the results:
+    </p>
+    <div class="container">
+	<figure>
+	    <img src="assets/1.jpeg">
+	    <figcaption>Kitchen (Left)</figcaption>
+	</figure>
+	<figure>
+	    <img src="assets/mosaic_1-2.jpeg"/>
+	    <figcaption>Mosaic<figcaption>
+	</figure>
+	<figure>
+	    <img src="assets/2.jpeg"/>
+	    <figcaption>Kitchen (Right)</figcaption>
+	</figure>
+    </div>
+    <div class="container">
+	<figure>
+	    <img src="assets/room_left.jpeg">
+	    <figcaption>Desk (Left)</figcaption>
+	</figure>
+	<figure>
+	    <img src="assets/mosaic_room_left-room_right.jpeg"/>
+	    <figcaption>Mosaic<figcaption>
+	</figure>
+	<figure>
+	    <img src="assets/room_right.jpeg"/>
+	    <figcaption>Desk (Right)</figcaption>
+	</figure>
+    </div>
+    <div class="container">
+	<figure>
+	    <img src="assets/stuffs_top.jpeg">
+	    <figcaption>Room (Top)</figcaption>
+	</figure>
+	<figure>
+	    <img src="assets/mosaic_stuffs_bottom-stuffs_top.jpeg"/>
+	    <figcaption>Mosaic<figcaption>
+	</figure>
+	<figure>
+	    <img src="assets/stuffs_bottom.jpeg"/>
+	    <figcaption>Room (Bottom)</figcaption>
+	</figure>
+    </div>
+</body>
+<style>
+    .container {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+    }
+
+    figure {
+	display: table;
+	margin-left: 5px;
+	margin-right: 5px;
+    }
+
+    figcaption {
+	display: table-caption;
+	caption-side: bottom;
+	text-align: center;
+	font-size: 14px;
+    }
+
+    img {
+	max-height: 350px;
+	max-width: 350px;
+	border: 1px solid black;
+    }
+</style>
+</html>
